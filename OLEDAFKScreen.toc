@@ -1,0 +1,7 @@
+## Interface: 110205, 110207, 50500, 50501, 50502, 11508
+## Title: OLED AFK Screen
+## Notes: Dims and hides the UI when AFK and rotates the camera to prevent burn-in.
+## Author: ArNz8o8
+## Version: 1.0
+
+OLEDAFKScreen.lua
