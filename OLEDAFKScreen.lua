@@ -176,6 +176,6 @@ SlashCmdList["OLEDAFK"] = function()
         Settings.OpenToCategory(optionsPanel.category:GetID())
     else
         -- Fallback voor als de categorie nog niet geregistreerd is
-        print("OLED AFK: Settings menu nog not yet loaded.")
+        print("OLED AFK: Settings menu not yet loaded.")
     end
 end
