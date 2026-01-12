@@ -161,7 +161,7 @@ OLEDAFK_Frame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" and arg1 == addonName then
         InitializeSettings()
         CreateOptions()
-        print("|cff00ff00OLEDAFKScreen by |r|cffffff00ArNz8o8|r|cff00ff00 loaded. Use |r|cffffff00/oled|r|cff00ff00 voor settings.|r")
+        print("|cff00ff00OLEDAFKScreen by |r|cffffff00ArNz8o8|r|cff00ff00 loaded. Use |r|cffffff00/oled|r|cff00ff00 for the settings.|r")
     elseif event == "PLAYER_REGEN_DISABLED" then
         StopAFKMode()
     elseif event == "PLAYER_FLAGS_CHANGED" and arg1 == "player" then
