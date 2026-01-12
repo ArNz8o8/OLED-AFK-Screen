@@ -7,7 +7,7 @@
 ## Title: OLED AFK Screen
 ## Notes: Protects your OLED screen during AFK.
 ## Author: ArNz8o8
-## Version: 2.0.0
+## Version: 2.0.4
 ## SavedVariables: OLEDAFK_Settings, OLEDAFK_Stats
 
 OLEDAFKScreen.lua
