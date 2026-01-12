@@ -9,7 +9,9 @@ local function InitializeSettings()
     if not OLEDAFK_Settings then 
         OLEDAFK_Settings = { 
             speed = 0.01,
-            dimIntensity = 0.95 
+            dimIntensity = 0.95,
+            useRotation = true, -- Dit zorgt ervoor dat het standaard AAN staat
+            useDance = true
         } 
     end
     if not OLEDAFK_Stats then 
@@ -41,7 +43,17 @@ local function StartAFKMode()
     if OLEDAFK_Active then return end
     OLEDAFK_Active = true
     AFK_StartTime = GetTime()
-    MoveViewRightStart(OLEDAFK_Settings.speed)
+    
+    -- Camera rotatie check
+    if OLEDAFK_Settings.useRotation then
+        MoveViewRightStart(OLEDAFK_Settings.speed)
+    end
+    
+    -- Dansen check
+    if OLEDAFK_Settings.useDance then
+        DoEmote("DANCE")
+    end
+    
     OLEDAFK_Overlay:Show()
     UIFrameFadeIn(OLEDAFK_Overlay, OLEDAFK_FADE_TIME, 0, OLEDAFK_Settings.dimIntensity)
 end
@@ -55,9 +67,12 @@ local function StopAFKMode()
     
     local playerName = UnitName("player")
     local _, classFile = UnitClass("player")
-    local classColor = C_ClassColor.GetClassColor(classFile):GenerateHexColor()
+    local classColor = "ffffffff"
+    local colorObj = C_ClassColor.GetClassColor(classFile)
+    if colorObj then classColor = colorObj:GenerateHexColor() end
     
     MoveViewRightStop()
+    
     UIFrameFadeOut(OLEDAFK_Overlay, OLEDAFK_FADE_TIME, OLEDAFK_Settings.dimIntensity, 0)
     C_Timer.After(OLEDAFK_FADE_TIME, function() 
         if not OLEDAFK_Active then OLEDAFK_Overlay:Hide() end 
@@ -117,36 +132,57 @@ local function CreateOptions()
         end
     end)
 
+    -- CHECKBOX: Camera Rotation
+    local rotationCB = CreateFrame("CheckButton", "OLEDAFK_RotationCheck", optionsPanel, "ChatConfigCheckButtonTemplate")
+    rotationCB:SetPoint("TOPLEFT", 26, -190)
+    _G[rotationCB:GetName() .. 'Text']:SetText(" Enable Camera Rotation")
+    rotationCB:SetScript("OnClick", function(self)
+        OLEDAFK_Settings.useRotation = self:GetChecked()
+    end)
+
+    -- CHECKBOX: Dance
+    local danceCB = CreateFrame("CheckButton", "OLEDAFK_DanceCheck", optionsPanel, "ChatConfigCheckButtonTemplate")
+    danceCB:SetPoint("TOPLEFT", 26, -220)
+    _G[danceCB:GetName() .. 'Text']:SetText(" Dance while AFK")
+    danceCB:SetScript("OnClick", function(self)
+        OLEDAFK_Settings.useDance = self:GetChecked()
+    end)
+
     -- Reset Button
     local resetButton = CreateFrame("Button", nil, optionsPanel, "UIPanelButtonTemplate")
-    resetButton:SetPoint("TOPLEFT", 30, -190)
-    resetButton:SetSize(120, 25)
+    resetButton:SetPoint("TOPLEFT", 30, -260)
+    resetButton:SetSize(140, 25)
     resetButton:SetText("Reset to Default")
     resetButton:SetScript("OnClick", function()
         OLEDAFK_Settings.speed = 0.01
         OLEDAFK_Settings.dimIntensity = 0.95
+        OLEDAFK_Settings.useRotation = true
+        OLEDAFK_Settings.useDance = true
         speedSlider:SetValue(0.01)
         dimSlider:SetValue(0.95)
+        rotationCB:SetChecked(true)
+        danceCB:SetChecked(true)
         print("|cff00ff00OLEDAFKScreen: Settings reset to default values.|r")
     end)
 
     -- Statistics
     local statsTitle = optionsPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    statsTitle:SetPoint("TOPLEFT", 16, -235)
+    statsTitle:SetPoint("TOPLEFT", 16, -305)
     statsTitle:SetText("Statistics")
 
     local statsText = optionsPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-    statsText:SetPoint("TOPLEFT", 16, -255)
+    statsText:SetPoint("TOPLEFT", 16, -325)
     
     optionsPanel:SetScript("OnShow", function()
         statsText:SetText("Total Protected Time: " .. FormatTime(OLEDAFK_Stats.totalTime))
         speedSlider:SetValue(OLEDAFK_Settings.speed)
         dimSlider:SetValue(OLEDAFK_Settings.dimIntensity)
+        rotationCB:SetChecked(OLEDAFK_Settings.useRotation)
+        danceCB:SetChecked(OLEDAFK_Settings.useDance)
         _G[speedSlider:GetName() .. 'Text']:SetText(string.format("Rotation Speed: %.3f", OLEDAFK_Settings.speed))
         _G[dimSlider:GetName() .. 'Text']:SetText(string.format("Screen Dimming: %d%%", OLEDAFK_Settings.dimIntensity * 100))
     end)
 
-    -- Register the category and store it in the optionsPanel for the slash command
     local category = Settings.RegisterCanvasLayoutCategory(optionsPanel, optionsPanel.name)
     Settings.RegisterAddOnCategory(category)
     optionsPanel.category = category
@@ -161,7 +197,7 @@ OLEDAFK_Frame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" and arg1 == addonName then
         InitializeSettings()
         CreateOptions()
-        print("|cff00ff00OLEDAFKScreen by |r|cffffff00ArNz8o8|r|cff00ff00 loaded. Use |r|cffffff00/oled|r|cff00ff00 for the settings.|r")
+        print("|cff00ff00OLEDAFKScreen by |r|cffffff00ArNz8o8|r|cff00ff00 loaded. Use |r|cffffff00/oled|r|cff00ff00 for settings.|r")
     elseif event == "PLAYER_REGEN_DISABLED" then
         StopAFKMode()
     elseif event == "PLAYER_FLAGS_CHANGED" and arg1 == "player" then
@@ -175,7 +211,6 @@ SlashCmdList["OLEDAFK"] = function()
     if optionsPanel.category then
         Settings.OpenToCategory(optionsPanel.category:GetID())
     else
-        -- Fallback voor als de categorie nog niet geregistreerd is
         print("OLED AFK: Settings menu not yet loaded.")
     end
 end
