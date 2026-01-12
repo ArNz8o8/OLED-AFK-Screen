@@ -1,8 +1,13 @@
-## Interface: 110007
-## Title: OLEDAFKScreen
-## Notes: Protects your OLED screen by dimming the UI and rotating the camera during AFK.
-## Author: Gemini Partner
-## Version: 1.5
+## Interface: 120100
+## Interface-Retail: 120100
+## Interface-Classic: 11505
+## X-Interface-TWW: 110207
+## X-Interface-Midnight: 120100
+
+## Title: OLED AFK Screen
+## Notes: Protects your OLED screen during AFK.
+## Author: ArNz8o8
+## Version: 2.0.0
 ## SavedVariables: OLEDAFK_Settings, OLEDAFK_Stats
 
 OLEDAFKScreen.lua
