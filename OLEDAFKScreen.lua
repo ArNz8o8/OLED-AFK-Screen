@@ -1,9 +1,8 @@
--- Author: ArNz8o8
+local addonName, addonTable = ...
 local OLEDAFK_Frame = CreateFrame("Frame")
 local OLEDAFK_Active = false
 local OLEDAFK_FADE_TIME = 2.0
 local AFK_StartTime = 0
-local OLEDAFK_Category -- Variable to store the Category ID
 
 -- 1. Configuration & Settings Initialization
 local function InitializeSettings()
@@ -76,7 +75,6 @@ local function CreateOptions()
     title:SetPoint("TOPLEFT", 16, -16)
     title:SetText("OLED AFK Screen Settings")
 
-    -- Author Tag
     local authorText = optionsPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     authorText:SetPoint("TOPLEFT", 18, -35)
     authorText:SetText("Created by |cffffff00ArNz8o8|r")
@@ -119,7 +117,7 @@ local function CreateOptions()
         end
     end)
 
-    -- Reset to Default Button
+    -- Reset Button
     local resetButton = CreateFrame("Button", nil, optionsPanel, "UIPanelButtonTemplate")
     resetButton:SetPoint("TOPLEFT", 30, -190)
     resetButton:SetSize(120, 25)
@@ -148,9 +146,10 @@ local function CreateOptions()
         _G[dimSlider:GetName() .. 'Text']:SetText(string.format("Screen Dimming: %d%%", OLEDAFK_Settings.dimIntensity * 100))
     end)
 
-    -- Register the category and store it in our variable
-    OLEDAFK_Category = Settings.RegisterCanvasLayoutCategory(optionsPanel, optionsPanel.name)
-    Settings.RegisterAddOnCategory(OLEDAFK_Category)
+    -- Register the category and store it in the optionsPanel for the slash command
+    local category = Settings.RegisterCanvasLayoutCategory(optionsPanel, optionsPanel.name)
+    Settings.RegisterAddOnCategory(category)
+    optionsPanel.category = category
 end
 
 -- 5. Event Handling
@@ -159,10 +158,10 @@ OLEDAFK_Frame:RegisterEvent("PLAYER_REGEN_DISABLED")
 OLEDAFK_Frame:RegisterEvent("ADDON_LOADED")
 
 OLEDAFK_Frame:SetScript("OnEvent", function(self, event, arg1)
-    if event == "ADDON_LOADED" and arg1 == "OLEDAFKScreen" then
+    if event == "ADDON_LOADED" and arg1 == addonName then
         InitializeSettings()
         CreateOptions()
-        print("|cff00ff00OLEDAFKScreen by |r|cffffff00ArNz8o8|r|cff00ff00 loaded. Type |r|cffffff00/oled|r|cff00ff00 for settings.|r")
+        print("|cff00ff00OLEDAFKScreen by |r|cffffff00ArNz8o8|r|cff00ff00 loaded. Use |r|cffffff00/oled|r|cff00ff00 voor settings.|r")
     elseif event == "PLAYER_REGEN_DISABLED" then
         StopAFKMode()
     elseif event == "PLAYER_FLAGS_CHANGED" and arg1 == "player" then
@@ -170,13 +169,13 @@ OLEDAFK_Frame:SetScript("OnEvent", function(self, event, arg1)
     end
 end)
 
--- 6. Slash Command (Fixed for Retail)
+-- 6. Slash Command
 SLASH_OLEDAFK1 = "/oled"
 SlashCmdList["OLEDAFK"] = function()
-    if OLEDAFK_Category then
-        Settings.OpenToCategory(OLEDAFK_Category:GetID())
+    if optionsPanel.category then
+        Settings.OpenToCategory(optionsPanel.category:GetID())
     else
-        -- Fallback if the category hasn't loaded for some reason
-        Settings.OpenToCategory("OLED AFK Screen")
+        -- Fallback voor als de categorie nog niet geregistreerd is
+        print("OLED AFK: Settings menu nog not yet loaded.")
     end
 end
